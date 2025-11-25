@@ -22,10 +22,7 @@ function renderHighlighted(text = "", q = "") {
       parts.push(text.slice(lastIndex, idx));
     }
     parts.push(
-      <mark
-        key={key++}
-        className="bg-yellow-200 px-0.5 rounded-sm"
-      >
+      <mark key={key++} className="bg-yellow-200 px-0.5 rounded-sm">
         {match[0]}
       </mark>
     );
@@ -84,83 +81,82 @@ function FiltersSidebar({ allItems, filters, setFilters, onClear }) {
     });
 
   return (
-    <aside className="card lift p-4 bg-white">
-      <h3 className="text-lg font-semibold mb-3">Filters</h3>
+    <aside className="card lift filters-card">
+      <h3 className="filters-title">Filters</h3>
 
       {/* Location */}
-      <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Location
-        </label>
-        <select
-          value={filters.location || ""}
-          onChange={(e) =>
-            setFilters((f) => ({
-              ...f,
-              location: e.target.value || null,
-            }))
-          }
-          className="mt-2 input"
-        >
-          <option value="">All locations</option>
-          {locations.map((loc) => (
-            <option value={loc} key={loc}>
-              {loc}
-            </option>
-          ))}
-        </select>
+      <div className="filters-group">
+        <label className="filters-label">Location</label>
+        <div className="filters-row">
+          <select
+            value={filters.location || ""}
+            onChange={(e) =>
+              setFilters((f) => ({
+                ...f,
+                location: e.target.value || null,
+              }))
+            }
+            className="input"
+          >
+            <option value="">All locations</option>
+            {locations.map((loc) => (
+              <option value={loc} key={loc}>
+                {loc}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Price */}
-      <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Price (₹)
-        </label>
-        <div className="mt-2 flex gap-2">
+      <div className="filters-group">
+        <label className="filters-label">Price (₹)</label>
+        <div className="filters-row" style={{ display: "flex", gap: "0.5rem" }}>
           <input
             type="number"
             placeholder="Min"
             value={filters.priceMin ?? ""}
             onChange={(e) => updateMin(e.target.value)}
-            className="input text-sm"
+            className="input"
           />
           <input
             type="number"
             placeholder="Max"
             value={filters.priceMax ?? ""}
             onChange={(e) => updateMax(e.target.value)}
-            className="input text-sm"
+            className="input"
           />
         </div>
       </div>
 
       {/* Rating */}
-      <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Rating
-        </label>
-        <div className="mt-2 space-y-2 text-sm">
+      <div className="filters-group">
+        <label className="filters-label">Rating</label>
+        <div className="filters-row" style={{ fontSize: "0.85rem" }}>
           {[4, 3, 2].map((r) => (
-            <label key={r} className="flex items-center gap-2">
+            <label
+              key={r}
+              style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}
+            >
               <input
                 type="checkbox"
                 checked={(filters.ratings || []).includes(r)}
                 onChange={() => toggleRating(r)}
               />
-              <span>{r}★ & up</span>
+              <span>{r}★ &amp; up</span>
             </label>
           ))}
         </div>
       </div>
 
       {/* Styles */}
-      <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Styles
-        </label>
-        <div className="mt-2 flex flex-wrap gap-2">
+      <div className="filters-group">
+        <label className="filters-label">Styles</label>
+        <div className="filters-row" style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
           {styles.length === 0 ? (
-            <div className="text-sm text-gray-500">No styles</div>
+            <div className="text-muted" style={{ fontSize: "0.85rem" }}>
+              No styles
+            </div>
           ) : (
             styles.map((s) => {
               const active = (filters.styles || []).includes(s);
@@ -170,9 +166,7 @@ function FiltersSidebar({ allItems, filters, setFilters, onClear }) {
                   type="button"
                   onClick={() => toggleStyle(s)}
                   className={`badge ${
-                    active
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : ""
+                    active ? "bg-blue-600 text-white border-blue-600" : ""
                   }`}
                 >
                   {s}
@@ -183,11 +177,12 @@ function FiltersSidebar({ allItems, filters, setFilters, onClear }) {
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4">
+      <div style={{ marginTop: "0.75rem" }}>
         <button
           type="button"
           onClick={onClear}
-          className="btn btn-ghost w-full text-sm"
+          className="btn btn-ghost"
+          style={{ width: "100%", fontSize: "0.8rem" }}
         >
           Clear filters
         </button>
@@ -199,57 +194,97 @@ function FiltersSidebar({ allItems, filters, setFilters, onClear }) {
 /* ---------------------- PhotographerCard ---------------------- */
 function PhotographerCard({ p, query }) {
   const navigate = useNavigate();
+
+  const id = p._id ?? p.id;
+  const displayName =
+    p.name || p.businessName || p.user?.name || "Photographer";
+  const location = p.location || p.city || "";
+  const rating = p.rating ?? null;
+  const priceValue = p.price ?? p.priceFrom ?? p.priceTo ?? null;
+
+  const priceLabel =
+    priceValue != null
+      ? `₹${priceValue.toLocaleString("en-IN")}`
+      : "Price on request";
+
+  const profilePic =
+    p.profilePic ||
+    p.portfolio?.[0]?.url ||
+    p.portfolio?.[0] ||
+    "https://placehold.co/300x200?text=Pixisphere";
+
   return (
-    <div className="card bg-white hover:shadow-lg transition-shadow duration-150 cursor-pointer">
-      <div
-        className="h-40 bg-gray-100 overflow-hidden"
-        onClick={() => navigate(`/photographer/${p.id}`)}
-      >
+    <div
+      className="card bg-white cursor-pointer"
+      onClick={() => navigate(`/photographer/${id}`)}
+    >
+      <div className="card-image-top">
         <img
-          src={p.profilePic || "https://placehold.co/300x200"}
-          alt={p.name}
+          src={profilePic}
+          alt={displayName}
           className="w-full h-full object-cover"
         />
       </div>
 
-      <div className="card-inner">
-        <div className="flex items-start justify-between gap-3">
+      <div className="card-inner card-inner--photographer">
+        {/* top row: title + price/rating */}
+        <div className="card-inner--photographer-top">
           <div className="min-w-0">
-            <h3
-              className="text-base font-semibold leading-tight"
-              onClick={() => navigate(`/photographer/${p.id}`)}
-            >
-              {renderHighlighted(p.name || "", query)}
+            <h3 className="text-base font-semibold leading-tight">
+              {renderHighlighted(displayName, query)}
             </h3>
-            <p className="text-xs mt-1 text-gray-500">{p.location}</p>
+            {location && (
+              <p className="card-inner--photographer-meta">{location}</p>
+            )}
           </div>
-          <div className="text-right text-xs">
-            <div className="font-semibold text-gray-800">
-              ₹{p.price.toLocaleString("en-IN")}
-            </div>
-            <div className="mt-1 inline-flex items-center gap-1 text-amber-600 font-medium">
-              <span>{p.rating}</span>
-              <span>★</span>
+
+          <div style={{ textAlign: "right", fontSize: "0.8rem" }}>
+            <div className="font-semibold text-gray-800">{priceLabel}</div>
+            <div
+              style={{
+                marginTop: "0.25rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "0.2rem",
+                color: "#b45309",
+                fontWeight: 500,
+              }}
+            >
+              {rating != null ? (
+                <>
+                  <span>{Number(rating).toFixed(1)}</span>
+                  <span>★</span>
+                </>
+              ) : (
+                <span style={{ color: "#9ca3af" }}>No rating</span>
+              )}
             </div>
           </div>
         </div>
 
-        <p className="mt-3 text-sm text-gray-700 two-line-truncate">
+        {/* bio */}
+        <p className="card-inner--photographer-body two-line-truncate">
           {renderHighlighted(p.bio || "", query)}
         </p>
 
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex flex-wrap gap-1">
+        {/* footer: tags + button pinned to bottom */}
+        <div className="card-inner--photographer-footer">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
             {p.tags?.slice(0, 3).map((t, i) => (
               <span key={i} className="badge">
                 {t}
               </span>
             ))}
           </div>
+
           <button
             type="button"
-            onClick={() => navigate(`/photographer/${p.id}`)}
             className="btn btn-primary text-xs"
+            onClick={(e) => {
+              e.stopPropagation(); // so card onClick doesn’t fire twice
+              navigate(`/photographer/${id}`);
+            }}
           >
             View Profile
           </button>
@@ -266,8 +301,8 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const location = useLocation();
-  const qParam = new URLSearchParams(location.search).get("q") || "";
+  const locationHook = useLocation();
+  const qParam = new URLSearchParams(locationHook.search).get("q") || "";
 
   const [filters, setFilters] = useState({
     priceMin: 0,
@@ -380,89 +415,100 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="min-h-screen py-6">
-      <div className="container flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="md:w-72 w-full md:flex-shrink-0">
-          <FiltersSidebar
-            allItems={allItems}
-            filters={filters}
-            setFilters={setFilters}
-            onClear={clearFilters}
-          />
-        </div>
+    <div className="page-shell">
+      <div className="container">
+        <div className="layout-main">
+          {/* Sidebar */}
+          <div className="layout-sidebar">
+            <FiltersSidebar
+              allItems={allItems}
+              filters={filters}
+              setFilters={setFilters}
+              onClear={clearFilters}
+            />
+          </div>
 
-        {/* Main content */}
-        <div className="flex-1">
-          <header className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="page-title">Photographers</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {loading
-                  ? "Loading results…"
-                  : `${items.length} result${
-                      items.length !== 1 ? "s" : ""
-                    } found`}
-              </p>
-            </div>
+          {/* Main content */}
+          <div className="layout-content">
+            <header className="section-header">
+              <div>
+                <h1 className="page-title">Photographers</h1>
+                <p className="results-meta">
+  {loading
+    ? "Loading results…"
+    : `${items.length} result${
+        items.length !== 1 ? "s" : ""
+      } found`}
+</p>
 
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-500">Sort by</span>
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="input max-w-[180px] py-1"
-              >
-                <option value="default">Relevance</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="rating_desc">Rating: High → Low</option>
-                <option value="recent">Recently added</option>
-              </select>
-            </div>
-          </header>
+              </div>
 
-          {loading ? (
-            <div className="grid-cols-responsive">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="card h-56 bg-gray-100 animate-pulse"
-                />
-              ))}
-            </div>
-          ) : error ? (
-            <div className="card p-4 text-red-700 bg-red-50 border border-red-100">
-              {error}
-            </div>
-          ) : items.length === 0 ? (
-            <div className="card p-6 text-gray-600">
-              No photographers found for "<strong>{qParam}</strong>"
-            </div>
-          ) : (
-            <>
+              <div className="sort-controls">
+                <span>Sort by</span>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="input"
+                >
+                  <option value="default">Relevance</option>
+                  <option value="price_asc">Price: Low → High</option>
+                  <option value="rating_desc">Rating: High → Low</option>
+                  <option value="recent">Recently added</option>
+                </select>
+              </div>
+            </header>
+
+            {loading ? (
               <div className="grid-cols-responsive">
-                {items.slice(0, visibleCount).map((p) => (
-                  <PhotographerCard key={p.id} p={p} query={qParam} />
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="card"
+                    style={{
+                      height: "220px",
+                      background: "#f3f4f6",
+                      animation: "pulse 1.3s ease-in-out infinite",
+                    }}
+                  />
                 ))}
               </div>
-
-              <div className="mt-6 flex justify-center">
-                {visibleCount < items.length ? (
-                  <button
-                    type="button"
-                    onClick={handleLoadMore}
-                    className="btn btn-primary text-sm"
-                  >
-                    Load more
-                  </button>
-                ) : (
-                  <div className="text-xs text-gray-500">
-                    No more results
-                  </div>
-                )}
+            ) : error ? (
+              <div className="card p-4 text-red-700 bg-red-50 border border-red-100">
+                {error}
               </div>
-            </>
-          )}
+            ) : items.length === 0 ? (
+              <div className="card p-6 text-gray-600">
+                No photographers found for "<strong>{qParam}</strong>"
+              </div>
+            ) : (
+              <>
+                <div className="grid-cols-responsive">
+                  {items.slice(0, visibleCount).map((p) => (
+                    <PhotographerCard
+                      key={p._id || p.id}
+                      p={p}
+                      query={qParam}
+                    />
+                  ))}
+                </div>
+
+                <div className="results-footer">
+  {visibleCount < items.length ? (
+    <button
+      type="button"
+      onClick={handleLoadMore}
+      className="btn btn-primary text-sm"
+    >
+      Load more
+    </button>
+  ) : (
+    <div>No more results</div>
+  )}
+</div>
+
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

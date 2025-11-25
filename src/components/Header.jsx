@@ -22,41 +22,37 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container flex items-center justify-between py-3 gap-4">
-
-        {/* Left: Logo */}
+    <header className="site-header">
+      <div className="container site-header-inner">
+        {/* Brand */}
         <div
+          className="site-brand"
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 cursor-pointer"
         >
-          <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-            P
-          </div>
+          <div className="site-brand-logo">P</div>
           <div>
-            <div className="font-bold text-lg leading-tight">Pixisphere</div>
-            <div className="text-xs text-gray-500">Find photographers</div>
+            <div className="site-brand-title">Pixisphere</div>
+            <div className="site-brand-subtitle">Find photographers</div>
           </div>
         </div>
 
-        {/* Center: Search Bar (full width on mobile) */}
+        {/* Search */}
         <form
           onSubmit={submitSearch}
-          className="flex-1 max-w-xl flex items-center"
+          className="site-header-center"
         >
-          <div className="relative w-full">
+          <div className="site-search-wrapper">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search photographers, locations, tags…"
-              className="input w-full pl-10 pr-3 py-2 text-sm"
+              className="site-search-input"
             />
-            {/* Search icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5 absolute left-3 top-2.5 text-gray-400 pointer-events-none"
-              fill="none"
+              className="site-search-icon"
               viewBox="0 0 24 24"
+              fill="none"
               stroke="currentColor"
               strokeWidth="2"
             >
@@ -69,16 +65,20 @@ export default function Header() {
           </div>
         </form>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
+        {/* Right actions */}
+        <div className="site-header-actions">
           <button
-            onClick={() => navigate("/")}
+            type="button"
             className="btn btn-ghost text-sm"
+            onClick={() => navigate("/")}
           >
             Browse
           </button>
-
-          <button className="btn btn-primary text-sm">
+          <button
+            type="button"
+            className="btn btn-primary text-sm"
+            onClick={() => navigate("/login")}
+          >
             Login
           </button>
         </div>

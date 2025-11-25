@@ -9,7 +9,7 @@
       "styles": ["Outdoor", "Studio"],
       "tags": ["Candid", "Maternity"],
       "bio": "Award-winning studio specializing in maternity and newborn shoots.",
-      "profilePic": "/images/ravi.jpg",
+      "profilePic": "https://artriva.com/images/portfolio/studio-b/studio-b-live.jpg",
       "portfolio": ["/images/portfolio1.jpg", "/images/portfolio2.jpg"],
       "reviews": [
         {
@@ -30,7 +30,7 @@
       "styles": ["Candid", "Indoor"],
       "tags": ["Newborn", "Birthday"],
       "bio": "Delhi-based candid specialist for kids and birthday parties.",
-      "profilePic": "/images/lensqueen.jpg",
+      "profilePic": "https://phometo.com/images/gallery/Baby_Photoshoot_-_Flower_paradise_theme1.jpg",
       "portfolio": ["/images/lens1.jpg", "/images/lens2.jpg"],
       "reviews": [
         {
@@ -51,7 +51,7 @@
       "styles": ["Studio", "Outdoor", "Traditional"],
       "tags": ["Wedding", "Pre-wedding"],
       "bio": "Capturing timeless wedding stories across India.",
-      "profilePic": "/images/clickfactory.jpg",
+      "profilePic": "https://www.focuzstudios.in/wp-content/uploads/2015/07/South-Indian-Wedding-Photography-43.jpg",
       "portfolio": ["/images/wed1.jpg", "/images/wed2.jpg"],
       "reviews": [
         {
@@ -72,7 +72,7 @@
       "styles": ["Outdoor", "Candid"],
       "tags": ["Maternity", "Couple"],
       "bio": "Natural light specialist focusing on emotional storytelling.",
-      "profilePic": "/images/neha.jpg",
+      "profilePic": "https://archphoto.studio/wp-content/uploads/2021/12/Red-Header-Image.jpg",
       "portfolio": ["/images/neha1.jpg", "/images/neha2.jpg"],
       "reviews": [
         {
@@ -93,7 +93,7 @@
       "styles": ["Studio"],
       "tags": ["Birthday", "Family"],
       "bio": "Affordable indoor shoots with creative themes.",
-      "profilePic": "/images/snapshot.jpg",
+      "profilePic": "https://images.stockcake.com/public/f/b/2/fb2e9e9c-b673-4f94-b618-5aa8c0e0b384_medium/professional-studio-photography-stockcake.jpg",
       "portfolio": ["/images/snapshot1.jpg", "/images/snapshot2.jpg"],
       "reviews": [
         {

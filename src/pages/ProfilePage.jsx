@@ -1,89 +1,95 @@
 // src/pages/ProfilePage.jsx
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
 import { fetchPhotographerById } from "../api/api";
 
-/* ------------------ Portal Modal (renders into document.body) ------------------ */
+/**
+ * Simple modal with overlay
+ */
 function Modal({ open, onClose, children }) {
   if (!open) return null;
 
-  // overlay style (full viewport)
   const overlayStyle = {
     position: "fixed",
     inset: 0,
-    background: "rgba(0,0,0,0.45)",
+    background: "rgba(15,23,42,0.45)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 2147483647, 
-    padding: "16px",
+    zIndex: 50,
+    padding: "1rem",
+    backdropFilter: "blur(4px)",
   };
 
-  // panel style (constrained, scrollable)
   const panelStyle = {
+    position: "relative",
     background: "#ffffff",
-    borderRadius: 12,
+    borderRadius: "0.9rem",
     width: "100%",
-    maxWidth: 720,
-    maxHeight: "86vh",
+    maxWidth: "720px",
+    maxHeight: "80vh",
     overflowY: "auto",
-    boxShadow: "0 12px 36px rgba(2,6,23,0.28)",
-    padding: 20,
+    boxShadow: "0 18px 45px rgba(15,23,42,0.35)",
   };
 
-  return createPortal(
-    <div
-      style={overlayStyle}
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
+  return (
+    <div style={overlayStyle} role="dialog" aria-modal="true" onClick={onClose}>
       <div style={panelStyle} onClick={(e) => e.stopPropagation()}>
-        {children}
+        <div className="card-inner">{children}</div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }
 
-/* ------------------ Toast (portal) ------------------ */
 function Toast({ message, onClose }) {
   if (!message) return null;
 
   const toastStyle = {
     position: "fixed",
-    right: 16,
-    bottom: 16,
+    right: "1rem",
+    bottom: "1rem",
     background: "#16a34a",
     color: "white",
-    padding: "10px 14px",
-    borderRadius: 8,
-    zIndex: 2147483647,
-    boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+    padding: "0.6rem 0.9rem",
+    borderRadius: "0.75rem",
+    fontSize: "0.8rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.7rem",
+    zIndex: 60,
+    boxShadow: "0 14px 30px rgba(22,163,74,0.45)",
   };
 
-  return createPortal(
+  return (
     <div style={toastStyle}>
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <span>{message}</span>
-        <button onClick={onClose} style={{ fontSize: 12, opacity: 0.9 }}>
-          Dismiss
-        </button>
-      </div>
-    </div>,
-    document.body
+      <span>{message}</span>
+      <button
+        type="button"
+        onClick={onClose}
+        style={{
+          border: "none",
+          background: "transparent",
+          color: "white",
+          cursor: "pointer",
+          fontSize: "0.7rem",
+          textDecoration: "underline",
+        }}
+      >
+        Dismiss
+      </button>
+    </div>
   );
 }
 
-/* ------------------ Profile Page ------------------ */
 export default function ProfilePage() {
   const { id } = useParams();
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // modal + form
+  // inquiry modal
   const [modalOpen, setModalOpen] = useState(false);
+
+  // form state
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [formErrors, setFormErrors] = useState({});
   const [sending, setSending] = useState(false);
@@ -107,177 +113,283 @@ export default function ProfilePage() {
   };
 
   const validate = () => {
-    const e = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
+    const err = {};
+    if (!form.name.trim()) err.name = "Name is required";
+    if (!form.email.trim()) err.email = "Email is required";
     else {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!re.test(form.email)) e.email = "Invalid email";
+      if (!re.test(form.email.trim())) err.email = "Invalid email address";
     }
-    if (!form.message.trim()) e.message = "Message is required";
-    setFormErrors(e);
-    return Object.keys(e).length === 0;
+    if (!form.message.trim()) err.message = "Message is required";
+    setFormErrors(err);
+    return Object.keys(err).length === 0;
   };
 
-  const handleSubmit = async (ev) => {
-    ev.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!validate()) return;
 
     setSending(true);
-    // simulate network delay
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise((res) => setTimeout(res, 800)); // fake delay
     setSending(false);
-
     setModalOpen(false);
-    setToast("Inquiry sent — photographer will contact you soon!");
+    setToast("Inquiry sent — the photographer will contact you soon!");
     setTimeout(() => setToast(""), 4000);
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!p) return <div className="p-6">Photographer not found.</div>;
+  /* ---------- Loading / error shells ---------- */
+
+  if (loading) {
+    return (
+      <div className="page-shell">
+        <div className="container">
+          <div className="card lift">
+            <div className="card-inner">Loading profile…</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!p) {
+    return (
+      <div className="page-shell">
+        <div className="container">
+          <div className="card lift">
+            <div className="card-inner">Photographer not found.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const priceLabel =
+    p.price != null
+      ? `₹${Number(p.price).toLocaleString("en-IN")}`
+      : "Price on request";
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      {/* Toast (portal) */}
+    <div className="page-shell">
       <Toast message={toast} onClose={() => setToast("")} />
 
-      <div className="max-w-5xl mx-auto px-4">
-        {/* TOP PROFILE CARD */}
-        <div className="bg-white rounded-xl shadow-md p-6 flex flex-col md:flex-row gap-8">
-          <img
-            src={p.profilePic}
-            alt={p.name}
-            className="w-full md:w-64 h-64 object-cover rounded-lg shadow-sm"
-          />
+      <div className="container space-y-8">
+        {/* HEADER CARD */}
+        <div className="card lift">
+          <div className="card-inner md:flex gap-6">
+            {/* Avatar */}
+            <div className="md:w-52 w-full md:flex-shrink-0">
+              <div className="card-image-top" style={{ height: "13rem" }}>
+                <img
+                  src={
+                    p.profilePic ||
+                    p.portfolio?.[0] ||
+                    "https://placehold.co/400x300?text=Pixisphere"
+                  }
+                  alt={p.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
 
-          <div className="flex flex-col flex-1 justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{p.name}</h1>
-              <p className="text-gray-500 mt-1">{p.location}</p>
-
-              <div className="flex items-center gap-6 mt-4">
-                <div className="text-xl font-semibold text-blue-700">
-                  ₹{p.price.toLocaleString("en-IN")}
+            {/* Text info */}
+            <div className="flex-1 flex flex-col gap-3 mt-4 md:mt-0">
+              <div className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h1 className="page-title">{p.name}</h1>
+                  <p className="text-sm text-muted mt-1">{p.location}</p>
                 </div>
-                <div className="flex items-center text-amber-600 font-medium gap-1">
-                  {p.rating} ★
+
+                <div className="text-right text-sm">
+                  <div className="font-semibold">{priceLabel}</div>
+                  <div className="mt-1 inline-flex items-center gap-1 text-amber-600 font-medium">
+                    <span>{p.rating}</span>
+                    <span>★</span>
+                  </div>
                 </div>
               </div>
 
-              <p className="mt-4 text-gray-700 leading-relaxed max-w-xl">
+              <p className="text-sm text-gray-700 leading-relaxed">
                 {p.bio}
               </p>
-            </div>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={openModal}
-                className="btn btn-primary text-sm"
-              >
-                Send Inquiry
-              </button>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {p.styles?.map((s) => (
+                  <span key={s} className="badge">
+                    {s}
+                  </span>
+                ))}
+                {p.tags?.map((t) => (
+                  <span key={t} className="badge">
+                    {t}
+                  </span>
+                ))}
+              </div>
 
-              <a
-                href={p.portfolio?.[0]}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-ghost text-sm"
-              >
-                View Sample
-              </a>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={openModal}
+                  className="btn btn-primary text-sm"
+                >
+                  Send Inquiry
+                </button>
+
+                {p.portfolio?.[0] && (
+                  <a
+                    href={p.portfolio[0]}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-ghost text-sm"
+                  >
+                    View Sample
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* PORTFOLIO */}
-        <h2 className="text-xl font-semibold mt-10 mb-4">Portfolio</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {p.portfolio.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              className="w-full h-40 rounded-lg object-cover shadow-sm"
-            />
-          ))}
-        </div>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-lg">Portfolio</h2>
+          </div>
+          {p.portfolio && p.portfolio.length > 0 ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {p.portfolio.map((img, idx) => (
+                <div key={idx} className="card">
+                  <div className="card-image-top" style={{ height: "9rem" }}>
+                    <img
+                      src={img}
+                      alt={`Portfolio ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="card">
+              <div className="card-inner text-sm text-muted">
+                No portfolio images added yet.
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* REVIEWS */}
-        <h2 className="text-xl font-semibold mt-10 mb-4">Reviews</h2>
-        <div className="space-y-4">
-          {p.reviews.map((r, i) => (
-            <div
-              key={i}
-              className="bg-white p-4 rounded-lg shadow-sm border border-gray-100"
-            >
-              <div className="flex justify-between mb-1">
-                <span className="font-semibold">{r.name}</span>
-                <span className="text-amber-600">{r.rating} ★</span>
-              </div>
-              <p className="text-gray-700">{r.comment}</p>
-              <p className="text-xs text-gray-400 mt-1">{r.date}</p>
+        <section className="space-y-3">
+          <h2 className="font-semibold text-lg">Reviews</h2>
+
+          {p.reviews && p.reviews.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {p.reviews.map((r, idx) => (
+                <div key={idx} className="card">
+                  <div className="card-inner">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-sm">{r.name}</span>
+                      <span className="text-amber-600 text-sm">
+                        {r.rating} ★
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700">{r.comment}</p>
+                    <p className="text-xs text-muted mt-2">{r.date}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : (
+            <div className="card">
+              <div className="card-inner text-sm text-muted">
+                No reviews yet.
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* results footer spacing mirror */}
+        <div className="results-footer">That’s all for this profile.</div>
       </div>
 
-      {/* Modal (portal) */}
+      {/* INQUIRY MODAL */}
       <Modal open={modalOpen} onClose={closeModal}>
-        <h3 className="text-xl font-semibold mb-4">Send Inquiry to {p.name}</h3>
+        <h3 className="text-lg font-semibold mb-3">
+          Send Inquiry to {p.name}
+        </h3>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Name */}
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-sm font-medium">Your Name</label>
+            <label className="text-xs font-semibold text-muted block mb-1">
+              Your name
+            </label>
             <input
-              className="input mt-1"
+              className="input"
               value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="John Doe"
+              onChange={(e) =>
+                setForm((f) => ({ ...f, name: e.target.value }))
+              }
+              placeholder="Your full name"
             />
             {formErrors.name && (
-              <p className="text-red-600 text-sm mt-1">{formErrors.name}</p>
+              <div className="text-xs text-red-600 mt-1">
+                {formErrors.name}
+              </div>
             )}
           </div>
 
-          {/* Email */}
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-xs font-semibold text-muted block mb-1">
+              Email
+            </label>
             <input
-              className="input mt-1"
+              className="input"
               value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, email: e.target.value }))
+              }
               placeholder="you@example.com"
             />
             {formErrors.email && (
-              <p className="text-red-600 text-sm mt-1">{formErrors.email}</p>
+              <div className="text-xs text-red-600 mt-1">
+                {formErrors.email}
+              </div>
             )}
           </div>
 
-          {/* Message */}
           <div>
-            <label className="text-sm font-medium">Message</label>
+            <label className="text-xs font-semibold text-muted block mb-1">
+              Message
+            </label>
             <textarea
-              className="input mt-1"
-              rows="6"
+              className="input"
+              rows={5}
               value={form.message}
               onChange={(e) =>
                 setForm((f) => ({ ...f, message: e.target.value }))
               }
-              placeholder="Describe the photoshoot requirements…"
+              placeholder="Share details about the shoot, dates and any special requests."
             />
             {formErrors.message && (
-              <p className="text-red-600 text-sm mt-1">
+              <div className="text-xs text-red-600 mt-1">
                 {formErrors.message}
-              </p>
+              </div>
             )}
           </div>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-3">
-            <button type="button" className="btn btn-ghost" onClick={closeModal}>
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="btn btn-ghost text-sm"
+              disabled={sending}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={sending}>
+            <button
+              type="submit"
+              className="btn btn-primary text-sm"
+              disabled={sending}
+            >
               {sending ? "Sending…" : "Send Inquiry"}
             </button>
           </div>

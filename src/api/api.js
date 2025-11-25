@@ -1,19 +1,9 @@
-// src/api/api.js
+import data from "../../db.json"; // path adjust if needed
 
-const API_BASE =
-  "https://pixisphere-frontend-murex.vercel.app/api/photographers";
-
-// Get ALL photographers
 export async function fetchPhotographers() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error("Failed to fetch photographers");
-  return res.json();
+  return data.photographers || [];
 }
 
-// Get photographer by ID
 export async function fetchPhotographerById(id) {
-  const url = `${API_BASE}?id=${id}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch photographer");
-  return res.json();
+  return (data.photographers || []).find((p) => String(p.id) === String(id));
 }
